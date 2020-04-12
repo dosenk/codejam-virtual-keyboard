@@ -1,0 +1,124 @@
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+}
+
+.wrapper {
+  margin: 8% auto;
+  max-width: 1024px;
+  width: 100%;
+  /* display: flex; */
+  flex-direction: column;
+}
+
+.textArea {
+  margin: 0 auto;
+  width: 750px;
+  height: 100%;
+  max-height: 200px;
+}
+
+.textArea > textarea {
+  width: 99%;
+  height: 100%;
+  resize: none;
+  outline: none; /*Светящаяся рамка:убераем*/
+  border-width: 2px; /*Ширина рамки:2px*/
+  border-radius: 2px; /*Скругление углов:2px*/
+  font-size: 18pt; /*Размер шрифта:18pt*/
+  background: #ecf0f1;
+}
+.keydbord-wrapper {
+  margin: 0 auto;
+  margin-top: 20px;
+  width: 750px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 2px solid rgb(233, 233, 233);
+  border-radius: 5px;
+}
+
+.key {
+  display: flex;
+  width: 40px;
+  height: 40px;
+  background-color: rgb(234, 238, 234);
+  margin: 5px;
+  border-radius: 5px;
+  transition-duration: 0.3s;
+}
+.ru,
+.en {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+
+.button,
+.buttonUp {
+  display: none;
+}
+
+.active {
+  margin: auto;
+  display: flex;
+}
+
+.active-button {
+  display: flex;
+  margin: auto;
+  height: 100%;
+  justify-content: center;
+  font-size: 1.1em;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.clicked-button,
+.clicked-button-capslock {
+  background-color: rgb(138, 12, 170);
+  border-radius: 50px;
+  color: aliceblue;
+  transition-duration: 0.4s;
+}
+.key:hover {
+  background-color: slateblue;
+  border-radius: 5px;
+}
+.key:active {
+  background-color: rgb(138, 12, 170);
+  border-radius: 50px;
+  color: aliceblue;
+}
+
+.Backspace,
+.CapsLock,
+.ShiftLeft,
+.ShiftRight,
+.Enter {
+  width: 90px;
+}
+
+.Space {
+  width: 340px;
+}
+
+.info {
+  margin: 0 auto;
+  margin-top: 20px;
+  /* width: 750px; */
+}
+
+.infoText {
+  font: italic;
+  font-size: x-large;
+  text-align: center;
+}
