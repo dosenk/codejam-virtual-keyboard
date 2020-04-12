@@ -54,10 +54,42 @@ export default class Keybord {
       const buttonSpanRu = Keybord.createButton('span', null, 'lang', 'ru');
       const buttonSpanEn = Keybord.createButton('span', null, 'lang', 'en');
       const index = this.keyCode.indexOf(key);
-      const buttonSpanUpEn = Keybord.createButton('span', this.keys.EN_CAPS[index], 'buttonUp');
-      const buttonSpanUpRu = Keybord.createButton('span', this.keys.RU_CAPS[index], 'buttonUp');
-      const buttonSpanDownEn = Keybord.createButton('span', this.keys.EN[index], 'button');
-      const buttonSpanDownRu = Keybord.createButton('span', this.keys.RU[index], 'button');
+      let capslockClassRu = 'notCaps'
+      let capslockClassEn = 'notCaps'
+      if (index < 1) {
+        capslockClassRu = 'Caps'
+        capslockClassEn = 'notCaps'
+      }
+      if (index >=1 && index <= 14) {
+        capslockClassRu = 'notCaps'
+        capslockClassEn = 'notCaps'
+      }
+      if (index >=15 && index <= 24) {
+        capslockClassRu = 'Caps'
+        capslockClassEn = 'Caps'
+      }
+      if (index >=25 && index <= 26) {
+        capslockClassRu = 'Caps'
+        capslockClassEn = 'notCaps'
+      }
+      if (index >=29 && index <= 38) {
+        capslockClassRu = 'Caps'
+        capslockClassEn = 'Caps'
+      }
+      if (index >=39 && index <= 40) {
+        capslockClassRu = 'Caps'
+      }
+      if (index >=43 && index <= 49) {
+        capslockClassRu = 'Caps'
+        capslockClassEn = 'Caps'
+      }
+      if (index >= 50 && index <= 51) {
+        capslockClassRu = 'Caps'
+      }
+      const buttonSpanUpEn = Keybord.createButton('span', this.keys.EN_CAPS[index], 'buttonUp', capslockClassEn);
+      const buttonSpanUpRu = Keybord.createButton('span', this.keys.RU_CAPS[index], 'buttonUp', capslockClassRu);
+      const buttonSpanDownEn = Keybord.createButton('span', this.keys.EN[index], 'button', capslockClassEn);
+      const buttonSpanDownRu = Keybord.createButton('span', this.keys.RU[index], 'button', capslockClassRu);
       buttonSpanEn.append(buttonSpanDownEn, buttonSpanUpEn);
       buttonSpanRu.append(buttonSpanDownRu, buttonSpanUpRu);
       if (this.language === 'ru') {
@@ -70,17 +102,18 @@ export default class Keybord {
         else buttonSpanDownEn.classList.add('active-button');
       }
       buttonDiv.append(buttonSpanRu, buttonSpanEn);
-      if (key === 'CapsLock' && this.capsLockFlag) {
-        if (!buttonDiv.classList.contains('clicked-button-capslock')) {
-          buttonDiv.classList.add('clicked-button-capslock');
-          this.clickedButton.add('CapsLock');
-          this.clickedMouse.add('CapsLock');
-        }
-      }
+      // if (key === 'CapsLock' && this.capsLockFlag) {
+      //   if (!buttonDiv.classList.contains('clicked-button-capslock')) {
+      //     buttonDiv.classList.add('clicked-button-capslock');
+      //     this.clickedButton.add('CapsLock');
+      //     this.clickedMouse.add('CapsLock');
+      //   }
+      // }
       keydbord.append(buttonDiv);
     });
     mainDiv.append(textAreaDiv, keydbord, infoDiv);
     document.body.append(mainDiv);
+   
   }
 
   addListenersOnKeys() {
@@ -118,6 +151,7 @@ export default class Keybord {
         this.keyUpHandler(event, code);
       }
     });
+    Keybord.renderActiveButton(this.language, 'button', null, true);
   }
 
   keyDownHandler(e, key) {
@@ -134,7 +168,7 @@ export default class Keybord {
         this.clickedButton.delete(key);
         this.clickedMouse.delete(key);
       }
-      Keybord.renderActiveButton(this.language, capslock);
+      Keybord.renderActiveButton(this.language, capslock, 'notCaps');
 
       return;
     }
@@ -147,7 +181,7 @@ export default class Keybord {
           span.childNodes.forEach((item) => item.classList.remove('active-button'));
         });
         const letterClass = this.capsLockFlag ? 'buttonUp' : 'button';
-        Keybord.renderActiveButton(this.language, letterClass);
+        Keybord.renderActiveButton(this.language, letterClass, null, true);
       }
     }
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
@@ -219,7 +253,7 @@ export default class Keybord {
       this.clickedButton.delete('ShiftRight');
       this.clickedMouse.delete('ShiftLeft');
       this.clickedMouse.delete('ShiftRight');
-    }
+    
     if (this.clickedButton.has('CapsLock') || this.clickedMouse.has('CapsLock')) {
       this.capsLockFlag = true;
       Keybord.renderActiveButton(this.language, 'buttonUp');
@@ -239,6 +273,7 @@ export default class Keybord {
       if (this.clickedButton.has('CapsLock') || this.clickedMouse.has('CapsLock')) letterClass = 'button';
       Keybord.renderActiveButton(this.language, letterClass);
     }
+  }
     Keybord.changeClassClickedButton(key, false);
   }
 
@@ -255,20 +290,89 @@ export default class Keybord {
     const leftShift = document.querySelector('.ShiftLeft').classList.contains('clicked-button-capslock');
     const rightShift = document.querySelector('.ShiftRight').classList.contains('clicked-button-capslock');
     if (capslock && (leftShift || rightShift)) {
-      return this.keys[`${lang}`][keyIndex];
-    } if (capslock || (rightShift || leftShift)) {
+      return this.getLetterWithCapsShift(keyIndex, lang)
+    } 
+    if (capslock) {
+      return this.getLetterWithCaps(keyIndex, lang);
+    } 
+    if (rightShift || leftShift) {
       return this.keys[`${lang}_CAPS`][keyIndex];
     }
     return this.keys[`${lang}`][keyIndex];
   }
 
-  static renderActiveButton(language, capslock) {
+  static renderActiveButton(language, capslock, capslockClass = null, flag = null) {
     const activeLangSpan = document.querySelectorAll(`.${language}`);
     activeLangSpan.forEach((span) => {
       span.childNodes.forEach((elem) => {
-        elem.classList.remove('active-button');
-        if (elem.classList.contains(capslock)) elem.classList.add('active-button');
+        if (capslockClass === 'notCaps' ) {
+          if (elem.classList.contains(capslockClass)) {
+            return
+          }
+        }
+        if (flag !== null) {
+          elem.classList.remove('active-button');
+          if (elem.classList.contains(capslock)) elem.classList.add('active-button');
+          return
+        }
+        elem.classList.toggle('active-button');
       });
     });
+  }
+
+  getLetterWithCaps(index, lang) {
+    let letter;
+    if (index < 1) {
+      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}`][index]
+    } else if (index >=1 && index <= 14) {
+      letter = this.keys[`${lang}`][index]
+    } else if (index >=15 && index <= 24) {
+      letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=25 && index <= 26) {
+      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}`][index]
+    } else if (index >=29 && index <= 38) {
+      letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=39 && index <= 40) {
+      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}`][index]
+    } else if (index >=43 && index <= 49) {
+      letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >= 50 && index <= 51) {
+      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}`][index]
+    } else {
+      letter = this.keys[`${lang}`][index]
+    }
+    return letter
+  }
+
+  getLetterWithCapsShift(index, lang) {
+    let letter;
+    if (index < 1) {
+      if (lang === 'RU') letter = this.keys[`${lang}`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=1 && index <= 14) {
+      letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=15 && index <= 24) {
+      letter = this.keys[`${lang}`][index]
+    } else if (index >=25 && index <= 26) {
+      if (lang === 'RU') letter = this.keys[`${lang}`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=29 && index <= 38) {
+      letter = this.keys[`${lang}`][index]
+    } else if (index >=39 && index <= 40) {
+      if (lang === 'RU') letter = this.keys[`${lang}`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=43 && index <= 49) {
+      letter = this.keys[`${lang}`][index]
+    } else if (index >= 50 && index <= 51) {
+      if (lang === 'RU') letter = this.keys[`${lang}`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
+    } else {
+      letter = this.keys[`${lang}_CAPS`][index]
+    }
+    return letter
   }
 }
