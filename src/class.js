@@ -287,6 +287,7 @@ export default class Keybord {
   }
 
   getLetter(key) {
+<<<<<<< HEAD
     let buttons = document.querySelectorAll('div.key')
     let letter
     buttons.forEach((button) => {
@@ -295,6 +296,23 @@ export default class Keybord {
       }
     })
     return letter
+=======
+    const keyIndex = this.keyCode.indexOf(key);
+    const lang = this.language.toUpperCase();
+    const capslock = document.querySelector('.CapsLock').classList.contains('clicked-button-capslock');
+    const leftShift = document.querySelector('.ShiftLeft').classList.contains('clicked-button-capslock');
+    const rightShift = document.querySelector('.ShiftRight').classList.contains('clicked-button-capslock');
+    if (capslock && (leftShift || rightShift)) {
+      return this.getLetterWithCapsShift(keyIndex, lang)
+    } 
+    if (capslock) {
+      return this.getLetterWithCaps(keyIndex, lang);
+    } 
+    if (rightShift || leftShift) {
+      return this.keys[`${lang}_CAPS`][keyIndex];
+    }
+    return this.keys[`${lang}`][keyIndex];
+>>>>>>> d99dbef567cdb3b5afcf24eec20c4ae38d69ca27
   }
 
   static renderActiveButton(language, capslock, capslockClass = null, flag = null) {
@@ -314,5 +332,61 @@ export default class Keybord {
         elem.classList.toggle('active-button');
       });
     });
+  }
+
+  getLetterWithCaps(index, lang) {
+    let letter;
+    if (index < 1) {
+      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}`][index]
+    } else if (index >=1 && index <= 14) {
+      letter = this.keys[`${lang}`][index]
+    } else if (index >=15 && index <= 24) {
+      letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=25 && index <= 26) {
+      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}`][index]
+    } else if (index >=29 && index <= 38) {
+      letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=39 && index <= 40) {
+      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}`][index]
+    } else if (index >=43 && index <= 49) {
+      letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >= 50 && index <= 51) {
+      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}`][index]
+    } else {
+      letter = this.keys[`${lang}`][index]
+    }
+    return letter
+  }
+
+  getLetterWithCapsShift(index, lang) {
+    let letter;
+    if (index < 1) {
+      if (lang === 'RU') letter = this.keys[`${lang}`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=1 && index <= 14) {
+      letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=15 && index <= 24) {
+      letter = this.keys[`${lang}`][index]
+    } else if (index >=25 && index <= 26) {
+      if (lang === 'RU') letter = this.keys[`${lang}`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=29 && index <= 38) {
+      letter = this.keys[`${lang}`][index]
+    } else if (index >=39 && index <= 40) {
+      if (lang === 'RU') letter = this.keys[`${lang}`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
+    } else if (index >=43 && index <= 49) {
+      letter = this.keys[`${lang}`][index]
+    } else if (index >= 50 && index <= 51) {
+      if (lang === 'RU') letter = this.keys[`${lang}`][index]
+      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
+    } else {
+      letter = this.keys[`${lang}_CAPS`][index]
+    }
+    return letter
   }
 }
