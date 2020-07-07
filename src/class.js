@@ -126,7 +126,7 @@ export default class Keybord {
       event.preventDefault();
       const { code } = event;
       if (this.keyCode.indexOf(code) < 0) return;
-      this.clickedButton.add(code);
+      this.clickedButton.add(code)
       this.keyDownHandler(event, code);
     });
     document.addEventListener('keyup', (event) => {
@@ -155,6 +155,7 @@ export default class Keybord {
   }
 
   keyDownHandler(e, key) {
+    console.log(e.code);
     if (key === 'CapsLock') {
       if (e.repeat) return;
       localStorage.capsLock = this.capsLockFlag ? 2 : 1;
@@ -213,7 +214,9 @@ export default class Keybord {
     let { selectionStart } = this.input;
     let { selectionEnd } = this.input;
     let keyValue = this.getLetter(key);
+
     Keybord.changeClassClickedButton(key, true);
+
     if (key === 'Backspace' || key === 'Delete') {
       if (key === 'Backspace') {
         if (selectionEnd === 0) return;
@@ -284,21 +287,14 @@ export default class Keybord {
   }
 
   getLetter(key) {
-    const keyIndex = this.keyCode.indexOf(key);
-    const lang = this.language.toUpperCase();
-    const capslock = document.querySelector('.CapsLock').classList.contains('clicked-button-capslock');
-    const leftShift = document.querySelector('.ShiftLeft').classList.contains('clicked-button-capslock');
-    const rightShift = document.querySelector('.ShiftRight').classList.contains('clicked-button-capslock');
-    if (capslock && (leftShift || rightShift)) {
-      return this.getLetterWithCapsShift(keyIndex, lang)
-    } 
-    if (capslock) {
-      return this.getLetterWithCaps(keyIndex, lang);
-    } 
-    if (rightShift || leftShift) {
-      return this.keys[`${lang}_CAPS`][keyIndex];
-    }
-    return this.keys[`${lang}`][keyIndex];
+    let buttons = document.querySelectorAll('div.key')
+    let letter
+    buttons.forEach((button) => {
+      if (button.getAttribute('code') === key) {
+        letter = button.querySelector('.active-button').innerText
+      }
+    })
+    return letter
   }
 
   static renderActiveButton(language, capslock, capslockClass = null, flag = null) {
@@ -318,61 +314,5 @@ export default class Keybord {
         elem.classList.toggle('active-button');
       });
     });
-  }
-
-  getLetterWithCaps(index, lang) {
-    let letter;
-    if (index < 1) {
-      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}`][index]
-    } else if (index >=1 && index <= 14) {
-      letter = this.keys[`${lang}`][index]
-    } else if (index >=15 && index <= 24) {
-      letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=25 && index <= 26) {
-      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}`][index]
-    } else if (index >=29 && index <= 38) {
-      letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=39 && index <= 40) {
-      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}`][index]
-    } else if (index >=43 && index <= 49) {
-      letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >= 50 && index <= 51) {
-      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}`][index]
-    } else {
-      letter = this.keys[`${lang}`][index]
-    }
-    return letter
-  }
-
-  getLetterWithCapsShift(index, lang) {
-    let letter;
-    if (index < 1) {
-      if (lang === 'RU') letter = this.keys[`${lang}`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=1 && index <= 14) {
-      letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=15 && index <= 24) {
-      letter = this.keys[`${lang}`][index]
-    } else if (index >=25 && index <= 26) {
-      if (lang === 'RU') letter = this.keys[`${lang}`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=29 && index <= 38) {
-      letter = this.keys[`${lang}`][index]
-    } else if (index >=39 && index <= 40) {
-      if (lang === 'RU') letter = this.keys[`${lang}`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=43 && index <= 49) {
-      letter = this.keys[`${lang}`][index]
-    } else if (index >= 50 && index <= 51) {
-      if (lang === 'RU') letter = this.keys[`${lang}`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
-    } else {
-      letter = this.keys[`${lang}_CAPS`][index]
-    }
-    return letter
   }
 }
