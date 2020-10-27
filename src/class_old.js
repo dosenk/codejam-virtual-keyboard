@@ -4,6 +4,7 @@ export default class Keybord {
     this.keyCode = keyCode;
     this.language = lang;
     this.clickedButton = new Set();
+    // this.clickedMouse = new Set();
     this.capsLockFlag = capsLockFlag;
     this.pressedShift = false;
     this.upperkey = upperkey;
@@ -34,6 +35,7 @@ export default class Keybord {
 
   renderKeybord() {
     this.clickedButton.clear();
+    // this.clickedMouse.clear();
     const mainDiv = Keybord.createButton('div', null, 'wrapper');
     const textAreaDiv = Keybord.createButton('div', null, 'textArea');
     const textArea = Keybord.createButton('textarea');
@@ -102,29 +104,61 @@ export default class Keybord {
         else buttonSpanDownEn.classList.add('active-button');
       }
       buttonDiv.append(buttonSpanRu, buttonSpanEn);
+      // if (key === 'CapsLock' && this.capsLockFlag) {
+      //   if (!buttonDiv.classList.contains('clicked-button-capslock')) {
+      //     buttonDiv.classList.add('clicked-button-capslock');
+      //     this.clickedButton.add('CapsLock');
+      //     this.clickedMouse.add('CapsLock');
+      //   }
+      // }
       keydbord.append(buttonDiv);
     });
     mainDiv.append(textAreaDiv, keydbord, infoDiv);
     document.body.append(mainDiv);
+   
   }
 
   addListenersOnKeys() {
+    // window.onblur = () => {
+    //   document.querySelectorAll('.clicked-button').forEach((child) => {
+    //     if (child.getAttribute('code') !== 'CapsLock') child.classList.remove('clicked-button');
+    //   });
+    // };
+
+
     document.addEventListener('keydown', (event) => {
       event.preventDefault();
       const { code } = event;
       if (this.keyCode.indexOf(code) < 0) return;
-
+      this.sendToMemoryBtn(code)
       this.keyDownHandler(event, code);
     });
     document.addEventListener('keyup', (event) => {
-      console.log(event);
       event.preventDefault();
       const { code } = event;
       if (this.keyCode.indexOf(code) < 0) return;
-      
+      // if (this.upperkey.indexOf(code) < 0) this.clickedButton.delete(code);
+      this.removeFromMemoryBtn(code);
       this.keyUpHandler(event, code);
-      console.log(this.clickedButton)
     });
+
+    // document.addEventListener('mousedown', (event) => {
+    //   if (event.target.classList.contains('active-button')) {
+    //     const code = event.target.parentNode.parentNode.getAttribute('code');
+    //     this.clickedButton.add(code);
+    //     this.keyDownHandler(event, code);
+    //   }
+    // });
+    // document.addEventListener('mouseup', (event) => {
+    //   if (!this.clickedButton.has('CapsLock')) this.clickedMouse.clear();
+    //   document.querySelectorAll('.clicked-button').forEach((elem) => elem.classList.remove('clicked-button'));
+    //   if (event.target.classList.contains('active-button')) {
+    //     const code = event.target.parentNode.parentNode.getAttribute('code');
+    //     this.keyUpHandler(event, code);
+    //   }
+    // });
+
+    // Keybord.renderActiveButton(this.language, 'button', null, true);
   }
 
   sendToMemoryBtn(btn) {
@@ -142,48 +176,110 @@ export default class Keybord {
   keyDownHandler(e, key) {
     // console.log(e);
     let buttonActiveClass; // 'buttonUp' or 'button'
-
     if (key === 'CapsLock') {
       if (e.repeat) return;
-      let classFlag;
       // меняем флаг (true: верхний регистр, false: нижний регистр)
       this.capsLockFlag = !this.capsLockFlag;
+      Keybord.changeClassClickedButton(key, this.capsLockFlag);
       buttonActiveClass = this.capsLockFlag ? 'buttonUp' : 'button';
-      if (this.checkFromMemoryBtn('ShiftRight') || this.checkFromMemoryBtn('ShiftLeft')) {
-        classFlag = buttonActiveClass !== 'button' ? false : true;
-      } else {
-        classFlag = buttonActiveClass === 'button' ? false : true;
-      }
-      Keybord.changeClassClickedButton(key, classFlag);
-      if (this.checkFromMemoryBtn('CapsLock')) this.removeFromMemoryBtn('CapsLock')
-      else this.sendToMemoryBtn('CapsLock')
       this.renderActiveButton(buttonActiveClass); 
       return;
     }
 
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
+      // this.pressedShift = true;
       if (e.repeat) return;
+      Keybord.changeClassClickedButton(key, this.capsLockFlag);
       buttonActiveClass = this.capsLockFlag ? 'button' : 'buttonUp';
-      this.renderActiveButton(buttonActiveClass, key);
-      this.capsLockFlag = !this.capsLockFlag;
-    } 
-    this.sendToMemoryBtn(key)
+      this.renderActiveButton(buttonActiveClass, true);
+      return;
+    }
+
+
+
+
+
+
+    if (key === 'AltLeft' || key === 'AltRight' || key === 'ControlLeft' || key === 'ControlRight' || key === 'MetaLeft') {
+      if (e.repeat) return;
+      console.log(this.clickedButton);
+      
+      document.querySelector(`.${key}`).classList.add('clicked-button');
+      return;
+    }
+    this.input = document.querySelector('textarea');
+    let { selectionStart } = this.input;
+    let { selectionEnd } = this.input;
+    let keyValue = this.getLetter(key);
+
     Keybord.changeClassClickedButton(key, true);
-    
+
+    if (key === 'Backspace' || key === 'Delete') {
+      if (key === 'Backspace') {
+        if (selectionEnd === 0) return;
+        if (selectionEnd === selectionStart) selectionStart -= 1;
+      }
+      if (key === 'Delete') {
+        if (this.input.value.length <= 0) return;
+        if (selectionEnd === selectionStart) selectionEnd += 1;
+      }
+      this.input.value = this.input.value.slice(0, selectionStart)
+      + this.input.value.slice(selectionEnd);
+      this.input.selectionStart = selectionStart;
+      this.input.selectionEnd = selectionStart;
+      return;
+    }
+    if (key === 'Tab') keyValue = '\t';
+    if (key === 'Enter') keyValue = '\n';
+    if (key === 'Space') keyValue = ' ';
+    if (key === 'ArrowLeft') keyValue = '←';
+    if (key === 'ArrowRight') keyValue = '→';
+    if (key === 'ArrowUp') keyValue = '↑';
+    if (key === 'ArrowDown') keyValue = '↓';
+
+    this.input.value = this.input.value.slice(0, selectionStart) + keyValue
+    + this.input.value.slice(selectionEnd);
+    this.input.selectionStart = selectionStart + 1;
+    this.input.selectionEnd = selectionStart + 1;
   }
-  
 
   keyUpHandler(e, key) {
-    // console.log(e);
+    // console.log(this.clickedButton);
     let buttonActiveClass;
     if (key === 'CapsLock') return;
 
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
+      Keybord.changeClassClickedButton(key, this.capsLockFlag);
       buttonActiveClass = this.capsLockFlag ? 'buttonUp' : 'button';
-      this.renderActiveButton(buttonActiveClass, key);
-      this.capsLockFlag = !this.capsLockFlag;
+      this.renderActiveButton(buttonActiveClass);
+      // this.pressedShift = false
+    //   document.querySelector('.ShiftLeft').classList.remove('clicked-button-capslock');
+    //   document.querySelector('.ShiftRight').classList.remove('clicked-button-capslock');
+    //   this.clickedButton.delete('ShiftLeft');
+    //   this.clickedButton.delete('ShiftRight');
+    //   // this.clickedMouse.delete('ShiftLeft');
+    //   // this.clickedMouse.delete('ShiftRight');
+    
+    // if (this.clickedButton.has('CapsLock') || this.clickedMouse.has('CapsLock')) {
+    //   this.capsLockFlag = true;
+    //   Keybord.renderActiveButton(this.language, 'buttonUp');
+    // } else {
+    //   this.capsLockFlag = false;
+    //   Keybord.renderActiveButton(this.language, 'button');
+    // }
+    // if (this.clickedButton.has('ShiftLeft') || this.clickedButton.has('ShiftRight')) {
+    //   this.capsLockFlag = true;
+    //   let letterClass = 'buttonUp';
+    //   if (this.clickedButton.has('CapsLock') || this.clickedMouse.has('CapsLock')) letterClass = 'button';
+    //   Keybord.renderActiveButton(this.language, letterClass);
+    // }
+    // if (this.clickedMouse.has('ShiftLeft') || this.clickedMouse.has('ShiftRight')) {
+    //   this.capsLockFlag = true;
+    //   let letterClass = 'buttonUp';
+    //   if (this.clickedButton.has('CapsLock') || this.clickedMouse.has('CapsLock')) letterClass = 'button';
+    //   Keybord.renderActiveButton(this.language, letterClass);
+    // }
   }
-    this.removeFromMemoryBtn(key); // remove from memory key, another CapsLock
     Keybord.changeClassClickedButton(key, false);
   }
 
@@ -204,21 +300,19 @@ export default class Keybord {
     return letter
   }
 
-  renderActiveButton(buttonActiveClass, btn = null) {
-
+  renderActiveButton(buttonActiveClass, pressedShift = false) {
+    console.log(this.clickedButton.has('ShiftLeft'));
+    // если нажали Shift то выбираем все буквы
     const lengSpanAll = document.querySelectorAll(`.${this.language}`);
-
-    if (btn === 'ShiftLeft' || btn === 'ShiftRight') {
-      lengSpanAll.forEach(lengSpan => {
-        lengSpan.childNodes.forEach(letterSpan=>{
-          letterSpan.classList.toggle('active-button')
-        })
-      })
-    } else {
-       lengSpanAll.forEach(lengSpan => {
-      if (lengSpan.classList.contains('notCaps')) {
+  
+    lengSpanAll.forEach(lengSpan => {
+      if (lengSpan.classList.contains('notCaps') && this.capsLockFlag) {
+        if (this.checkFromMemoryBtn('ShiftLeft') || this.checkFromMemoryBtn('ShiftRight')) {
+          console.log(123);
         return  
         }
+      //  console.log(2);
+      }
       lengSpan.childNodes.forEach(letterSpan=>{
         if (letterSpan.classList.contains(buttonActiveClass)) {
           letterSpan.classList.add('active-button')
@@ -226,10 +320,25 @@ export default class Keybord {
           letterSpan.classList.remove('active-button')
         }
       })
+
     })
-    } 
-    
-   
+
+
+    // activeLangSpan.forEach((span) => {
+    //   span.childNodes.forEach((elem) => {
+    //     if (capslockClass === 'notCaps' ) {
+    //       if (elem.classList.contains(capslockClass)) {
+    //         return
+    //       }
+    //     }
+    //     if (key === ) {
+    //       elem.classList.remove('active-button');
+    //       if (elem.classList.contains(capslock)) elem.classList.add('active-button');
+    //       return
+    //     }
+    //     elem.classList.toggle('active-button');
+    //   });
+    // });
   }
 
   getLetterWithCaps(index, lang) {
