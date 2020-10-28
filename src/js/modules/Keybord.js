@@ -153,7 +153,7 @@ export default class Keybord {
         }
 
         this.keyDownHandler(event, code);
-        if (this.pressedShift) {
+        if (this.pressedShift && code !== 'CapsLock') {
           this.pressedShift = !this.pressedShift;
           this.capsLockFlag = true;
           const btnShift = this.checkFromMemoryBtn('ShiftRight') ? 'ShiftRight' : 'ShiftLeft';
@@ -180,7 +180,7 @@ export default class Keybord {
   changeShiftForMouse(code) {
     Keybord.changeClassClickedButton('ShiftRight', this.pressedShift);
     Keybord.changeClassClickedButton('ShiftLeft', this.pressedShift);
-    this.capsLockFlag = !this.capsLockFlag;
+    this.capsLockFlag = this.checkFromMemoryBtn('CapsLock') ? this.capsLockFlag : !this.capsLockFlag;
     const buttonActiveClass = !this.capsLockFlag ? 'button' : 'buttonUp';
     this.renderActiveButton(buttonActiveClass, code);
     if (this.pressedShift) this.sendToMemoryBtn(code);
@@ -224,6 +224,7 @@ export default class Keybord {
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
       if (e.repeat) return;
       if (this.checkFromMemoryBtn('ShiftLeft') || this.checkFromMemoryBtn('ShiftRight')) return;
+      if (this.pressedShift) this.pressedShift = !this.pressedShift;
       buttonActiveClass = this.capsLockFlag ? 'button' : 'buttonUp';
       this.sendToMemoryBtn(key);
       this.renderActiveButton(buttonActiveClass, key);
