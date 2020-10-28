@@ -117,7 +117,7 @@ export default class Keybord {
       this.keyDownHandler(event, code);
     });
     document.addEventListener('keyup', (event) => {
-      console.log(event);
+      // console.log(event);
       event.preventDefault();
       const { code } = event;
       if (this.keyCode.indexOf(code) < 0) return;
@@ -131,8 +131,10 @@ export default class Keybord {
     this.clickedButton.add(btn)
   }
 
-  removeFromMemoryBtn(btn) {
-    this.clickedButton.delete(btn)
+  removeFromMemoryBtn(...btns) {
+    btns.forEach(btn=>(
+      this.clickedButton.delete(btn)
+    ))
   }
 
   checkFromMemoryBtn(btn) {
@@ -140,13 +142,10 @@ export default class Keybord {
   }
 
   keyDownHandler(e, key) {
-    // console.log(e);
     let buttonActiveClass; // 'buttonUp' or 'button'
-
     if (key === 'CapsLock') {
       if (e.repeat) return;
       let classFlag;
-      // меняем флаг (true: верхний регистр, false: нижний регистр)
       this.capsLockFlag = !this.capsLockFlag;
       buttonActiveClass = this.capsLockFlag ? 'buttonUp' : 'button';
       if (this.checkFromMemoryBtn('ShiftRight') || this.checkFromMemoryBtn('ShiftLeft')) {
@@ -162,19 +161,21 @@ export default class Keybord {
     }
 
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
-      if (e.repeat) return;
+      if (e.repeat) return;   
       buttonActiveClass = this.capsLockFlag ? 'button' : 'buttonUp';
       this.renderActiveButton(buttonActiveClass, key);
       this.capsLockFlag = !this.capsLockFlag;
+      
+      let key2 = key === 'ShiftLeft' ? 'ShiftRight' : 'ShiftLeft'
+      Keybord.changeClassClickedButton(key2, true);
     } 
     this.sendToMemoryBtn(key)
     Keybord.changeClassClickedButton(key, true);
-    
   }
   
 
   keyUpHandler(e, key) {
-    // console.log(e);
+    
     let buttonActiveClass;
     if (key === 'CapsLock') return;
 
@@ -182,6 +183,10 @@ export default class Keybord {
       buttonActiveClass = this.capsLockFlag ? 'buttonUp' : 'button';
       this.renderActiveButton(buttonActiveClass, key);
       this.capsLockFlag = !this.capsLockFlag;
+      let key2 = key === 'ShiftLeft' ? 'ShiftRight' : 'ShiftLeft'
+      Keybord.changeClassClickedButton(key2, false);
+      this.removeFromMemoryBtn(key2)
+
   }
     this.removeFromMemoryBtn(key); // remove from memory key, another CapsLock
     Keybord.changeClassClickedButton(key, false);
@@ -205,9 +210,7 @@ export default class Keybord {
   }
 
   renderActiveButton(buttonActiveClass, btn = null) {
-
     const lengSpanAll = document.querySelectorAll(`.${this.language}`);
-
     if (btn === 'ShiftLeft' || btn === 'ShiftRight') {
       lengSpanAll.forEach(lengSpan => {
         lengSpan.childNodes.forEach(letterSpan=>{
@@ -215,10 +218,8 @@ export default class Keybord {
         })
       })
     } else {
-       lengSpanAll.forEach(lengSpan => {
-      if (lengSpan.classList.contains('notCaps')) {
-        return  
-        }
+      lengSpanAll.forEach(lengSpan => {
+      if (lengSpan.classList.contains('notCaps')) return  
       lengSpan.childNodes.forEach(letterSpan=>{
         if (letterSpan.classList.contains(buttonActiveClass)) {
           letterSpan.classList.add('active-button')
@@ -228,63 +229,5 @@ export default class Keybord {
       })
     })
     } 
-    
-   
-  }
-
-  getLetterWithCaps(index, lang) {
-    let letter;
-    if (index < 1) {
-      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}`][index]
-    } else if (index >=1 && index <= 14) {
-      letter = this.keys[`${lang}`][index]
-    } else if (index >=15 && index <= 24) {
-      letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=25 && index <= 26) {
-      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}`][index]
-    } else if (index >=29 && index <= 38) {
-      letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=39 && index <= 40) {
-      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}`][index]
-    } else if (index >=43 && index <= 49) {
-      letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >= 50 && index <= 51) {
-      if (lang === 'RU') letter = this.keys[`${lang}_CAPS`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}`][index]
-    } else {
-      letter = this.keys[`${lang}`][index]
-    }
-    return letter
-  }
-
-  getLetterWithCapsShift(index, lang) {
-    let letter;
-    if (index < 1) {
-      if (lang === 'RU') letter = this.keys[`${lang}`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=1 && index <= 14) {
-      letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=15 && index <= 24) {
-      letter = this.keys[`${lang}`][index]
-    } else if (index >=25 && index <= 26) {
-      if (lang === 'RU') letter = this.keys[`${lang}`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=29 && index <= 38) {
-      letter = this.keys[`${lang}`][index]
-    } else if (index >=39 && index <= 40) {
-      if (lang === 'RU') letter = this.keys[`${lang}`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
-    } else if (index >=43 && index <= 49) {
-      letter = this.keys[`${lang}`][index]
-    } else if (index >= 50 && index <= 51) {
-      if (lang === 'RU') letter = this.keys[`${lang}`][index]
-      if (lang === 'EN') letter = this.keys[`${lang}_CAPS`][index]
-    } else {
-      letter = this.keys[`${lang}_CAPS`][index]
-    }
-    return letter
   }
 }
