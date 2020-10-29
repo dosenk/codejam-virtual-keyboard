@@ -45,16 +45,6 @@ body {
   top: calc(100vh - 250px);
 }
 
-.key {
-  display: block;
-  width: 40px;
-  height: 40px;
-  background-color: rgb(234, 238, 234);
-  margin: 5px;
-  border: none;
-  border-radius: 5px;
-  transition-duration: 0.3s;
-}
 .ru,
 .en {
   display: none;
@@ -64,8 +54,8 @@ body {
 
 .button,
 .buttonUp {
+  transition: all 0.4s;
   display: none;
-  border-radius: 50px;
 }
 
 .active {
@@ -73,51 +63,76 @@ body {
   display: flex;
 }
 
+.key {
+  display: block;
+  width: 40px;
+  height: 40px;
+  background-color: rgb(234, 238, 234);
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  transition: all 0.4s;
+  &:hover {
+    border-radius: 50px;
+  }
+}
+
+.record {
+  span button {
+    background-color: red;
+    color: aliceblue;
+  }
+}
+
 .active-button {
   display: flex;
-  margin: auto;
   height: 100%;
-  justify-content: center;
-  font-size: 1.1em;
-  align-items: center;
   width: 100%;
-  cursor: pointer;
-  font-size: 18px;
+  justify-content: center;
+  align-items: center;
+  font-size: 1em;
   font-weight: 600;
   border: none;
-  border-radius: 55px;
+  border-radius: 5px;
   background-color: #ecf0f1;
-  transition: all;
+
+  cursor: pointer;
   &:hover {
+    transition: all 0.2s;
     background-color: slateblue;
-    // border-radius: 5px;
   }
   &:active,
   &:focus {
+    transition: all 0.4s;
     outline: none;
     background-color: rgb(138, 12, 170);
     border-radius: 50px;
     color: aliceblue;
-    transition-duration: 0.4s;
   }
 }
 
-.clicked-button,
-.clicked-button-capslock {
-  background-color: rgb(138, 12, 170);
+.clicked-button {
   border-radius: 50px;
-  color: aliceblue;
-  transition-duration: 0.4s;
+  span button {
+    background-color: rgb(138, 12, 170);
+    border-radius: 50px;
+    color: aliceblue;
+  }
 }
-.key:hover {
-  background-color: slateblue;
-  border-radius: 50px;
-  transition-duration: 0.4s;
+.Rec {
+  span button {
+    &:hover {
+      background-color: red;
+    }
+  }
 }
-.key:active {
-  background-color: rgb(138, 12, 170);
-  border-radius: 50px;
-  color: aliceblue;
+.Lang {
+  span button span {
+    position: relative;
+    font-size: x-small;
+    top: -7px;
+    right: -1px;
+  }
 }
 
 .Backspace,
@@ -129,13 +144,12 @@ body {
 }
 
 .Space {
-  width: 240px;
+  width: 190px;
 }
 
 .info {
   margin: 0 auto;
   margin-top: 20px;
-  /* width: 750px; */
 }
 
 .infoText {

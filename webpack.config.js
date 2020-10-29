@@ -2,7 +2,7 @@ const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-// const CopyPlugin = require('copy-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -29,13 +29,13 @@ module.exports = {
       filename: isDev ? '[name].css' : '[name].[contenthash].css',
       chunkFilename: isDev ? '[id].css' : '[id].[contenthash].css',
     }),
-    // new CopyPlugin(
-    //   // {
-    //   // patterns: [
-    //   //   { from: './src/assets/images/pets', to: './images/pets' },
-    //   // ],
-    // // }
-    // ),
+    new CopyPlugin(
+      {
+        patterns: [
+          { from: './src/assets/sounds', to: './assets/sounds' },
+        ],
+      },
+    ),
   ],
   module: {
     rules: [
