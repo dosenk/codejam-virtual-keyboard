@@ -83,10 +83,10 @@ export default class Keybord {
       }
       const buttonSpanRu = Keybord.createButton('span', null, 'lang', 'ru', capslockClassRu);
       const buttonSpanEn = Keybord.createButton('span', null, 'lang', 'en', capslockClassEn);
-      const buttonSpanUpEn = Keybord.createButton('span', this.keys.EN_CAPS[index], 'buttonUp');
-      const buttonSpanUpRu = Keybord.createButton('span', this.keys.RU_CAPS[index], 'buttonUp');
-      const buttonSpanDownEn = Keybord.createButton('span', this.keys.EN[index], 'button');
-      const buttonSpanDownRu = Keybord.createButton('span', this.keys.RU[index], 'button');
+      const buttonSpanUpEn = Keybord.createButton('button', this.keys.EN_CAPS[index], 'buttonUp');
+      const buttonSpanUpRu = Keybord.createButton('button', this.keys.RU_CAPS[index], 'buttonUp');
+      const buttonSpanDownEn = Keybord.createButton('button', this.keys.EN[index], 'button');
+      const buttonSpanDownRu = Keybord.createButton('button', this.keys.RU[index], 'button');
       buttonSpanEn.append(buttonSpanDownEn, buttonSpanUpEn);
       buttonSpanRu.append(buttonSpanDownRu, buttonSpanUpRu);
       if (this.language === 'ru') {
@@ -139,32 +139,36 @@ export default class Keybord {
         this.displayKeybord(false);
       }
     });
-    document.addEventListener('mouseup', (event) => {
-      if (event.target.classList.contains('active-button')) {
-        const code = event.target.parentNode.parentNode.getAttribute('code');
-        if (code === 'ShiftRight' || code === 'ShiftLeft') {
-          this.pressedShift = !this.pressedShift;
-          this.changeShiftForMouse(code);
-          return;
-        }
-        if (code === 'Lang') {
-          this.changeLang(code);
-          return;
-        }
+    document.addEventListener('mouseup', this.mouseUp);
+  }
 
-        this.keyDownHandler(event, code);
-        if (this.pressedShift && code !== 'CapsLock') {
-          this.pressedShift = !this.pressedShift;
-          this.capsLockFlag = true;
-          const btnShift = this.checkFromMemoryBtn('ShiftRight') ? 'ShiftRight' : 'ShiftLeft';
-          this.changeShiftForMouse(btnShift);
-        }
-        document.querySelectorAll('.clicked-button').forEach((elem) => {
-          if (elem.getAttribute('code') === 'CapsLock' || elem.getAttribute('code') === 'ShiftLeft' || elem.getAttribute('code') === 'ShiftRight') return;
-          elem.classList.remove('clicked-button');
-        });
+ mouseUp = (event) => {
+    if (event.target.classList.contains('active-button')) {
+      
+      const code = event.target.parentNode.parentNode.getAttribute('code');
+      if (code === 'ShiftRight' || code === 'ShiftLeft') {
+        // if (this.checkFromMemoryBtn('ShiftRight') || this.checkFromMemoryBtn('ShiftLeft')) return;
+        this.pressedShift = !this.pressedShift;
+        this.changeShiftForMouse(code);
+        return;
       }
-    });
+      if (code === 'Lang') {
+        this.changeLang(code);
+        return;
+      }
+
+      this.keyDownHandler(event, code);
+      if (this.pressedShift && code !== 'CapsLock') {
+        this.pressedShift = !this.pressedShift;
+        this.capsLockFlag = true;
+        const btnShift = this.checkFromMemoryBtn('ShiftRight') ? 'ShiftRight' : 'ShiftLeft';
+        this.changeShiftForMouse(btnShift);
+      }
+      document.querySelectorAll('.clicked-button').forEach((elem) => {
+        if (elem.getAttribute('code') === 'CapsLock' || elem.getAttribute('code') === 'ShiftLeft' || elem.getAttribute('code') === 'ShiftRight') return;
+        elem.classList.remove('clicked-button');
+      });
+    }
   }
 
   changeLang(code) {
@@ -178,11 +182,11 @@ export default class Keybord {
   }
 
   changeShiftForMouse(code) {
-    Keybord.changeClassClickedButton('ShiftRight', this.pressedShift);
-    Keybord.changeClassClickedButton('ShiftLeft', this.pressedShift);
     this.capsLockFlag = this.checkFromMemoryBtn('CapsLock') ? this.capsLockFlag : !this.capsLockFlag;
     const buttonActiveClass = !this.capsLockFlag ? 'button' : 'buttonUp';
     this.renderActiveButton(buttonActiveClass, code);
+    Keybord.changeClassClickedButton('ShiftRight', this.pressedShift);
+    Keybord.changeClassClickedButton('ShiftLeft', this.pressedShift);
     if (this.pressedShift) this.sendToMemoryBtn(code);
     else this.removeFromMemoryBtn(code);
   }
@@ -214,15 +218,26 @@ export default class Keybord {
       } else {
         classFlag = buttonActiveClass !== 'button';
       }
-      Keybord.changeClassClickedButton(key, classFlag);
+      
       if (this.checkFromMemoryBtn('CapsLock')) this.removeFromMemoryBtn('CapsLock');
       else this.sendToMemoryBtn('CapsLock');
       this.renderActiveButton(buttonActiveClass);
+      Keybord.changeClassClickedButton(key, classFlag);
       return;
     }
     /* *************************************** SHIFT ************************************* */
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
       if (e.repeat) return;
+      document.querySelector('.ShiftLeft').childNodes.forEach(spans => {
+        spans.childNodes.forEach(button=> {
+          button.disabled = true
+        })
+      })
+      document.querySelector('.ShiftRight').childNodes.forEach(spans => {
+        spans.childNodes.forEach(button=> {
+          button.disabled = true
+        })
+      })
       if (this.checkFromMemoryBtn('ShiftLeft') || this.checkFromMemoryBtn('ShiftRight')) return;
       if (this.pressedShift) this.pressedShift = !this.pressedShift;
       buttonActiveClass = this.capsLockFlag ? 'button' : 'buttonUp';
@@ -292,6 +307,17 @@ export default class Keybord {
     if (key === 'CapsLock') return;
 
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
+      console.log(document.querySelectorAll('.ShiftLeft', '.ShiftRight'));
+      document.querySelector('.ShiftLeft').childNodes.forEach(spans => {
+        spans.childNodes.forEach(button=> {
+          button.disabled = false
+        })
+      })
+      document.querySelector('.ShiftRight').childNodes.forEach(spans => {
+        spans.childNodes.forEach(button=> {
+          button.disabled = false
+        })
+      })
       buttonActiveClass = this.capsLockFlag ? 'button' : 'buttonUp';
       const key2 = key === 'ShiftLeft' ? 'ShiftRight' : 'ShiftLeft';
       this.removeFromMemoryBtn(key);
@@ -307,14 +333,26 @@ export default class Keybord {
   }
 
   static changeClassClickedButton(key, flag = true) {
-    const nowClickedButton = document.querySelector(`.${key}`);
-    if (flag) nowClickedButton.classList.add('clicked-button');
-    else nowClickedButton.classList.remove('clicked-button');
+    const nowClickedButtonDiv = document.querySelector(`.${key}`);
+    const nowClickedButton = document.querySelector(`.${key} .active-button`);
+    // console.log(nowClickedButton);
+    let addedClass = 'clicked-button'
+    if (key === 'CapsLock') {
+      addedClass = 'clicked-button-capslock'
+    }
+    if (flag) 
+    {
+      nowClickedButtonDiv.classList.add(addedClass);
+      nowClickedButton.classList.add(addedClass);
+
+    } else {
+      nowClickedButtonDiv.classList.remove(addedClass);
+      nowClickedButton.classList.remove(addedClass);
+    }
   }
 
   static getLetter(key) {
     const buttons = document.querySelectorAll('div.key');
-    // console.log(key);
     let letter;
     buttons.forEach((button) => {
       if (button.getAttribute('code') === key) {
