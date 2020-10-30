@@ -20,22 +20,25 @@ module.exports = {
   },
   devtool: isDev ? 'source-map' : '',
   plugins: [
+    new CopyPlugin(
+      {
+        patterns: [
+          { from: './src/assets/sounds', to: './assets/sounds' },
+          { from: './src/assets/images/favicon.ico', to: './favicon.ico' },
+        ],
+      },
+    ),
     new HTMLWebpackPlugin({
+      // favicon: './assets/images/favicon.ico',
       filename: 'index.html',
       template: './src/index.html',
+
     }),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
       filename: isDev ? '[name].css' : '[name].[contenthash].css',
       chunkFilename: isDev ? '[id].css' : '[id].[contenthash].css',
     }),
-    new CopyPlugin(
-      {
-        patterns: [
-          { from: './src/assets/sounds', to: './assets/sounds' },
-        ],
-      },
-    ),
   ],
   module: {
     rules: [

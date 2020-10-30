@@ -10,39 +10,46 @@ body {
   max-width: 1024px;
   width: 100vh;
   overflow: hidden;
-}
-
-.textArea {
-  margin: 0 auto;
-  width: 750px;
-  height: 100%;
-  max-height: 200px;
-}
-
-.textArea > textarea {
-  width: 99%;
-  height: 100%;
-  resize: none;
-  outline: none; /*Светящаяся рамка:убераем*/
-  border-width: 2px; /*Ширина рамки:2px*/
-  border-radius: 2px; /*Скругление углов:2px*/
-  font-size: 18pt; /*Размер шрифта:18pt*/
-  background: #ecf0f1;
-}
-.keydbord-wrapper {
-  margin: 0 auto;
-  margin-top: 20px;
-  width: 750px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  background: #fff;
-  border: 2px solid rgb(233, 233, 233);
-  border-radius: 5px;
-  transition: top 0.5s;
-  position: relative;
-  top: calc(100vh - 250px);
+  .textArea {
+    margin: 0 auto;
+    width: 750px;
+    height: 100%;
+    max-height: 200px;
+    & > textarea {
+      width: 99%;
+      height: 100%;
+      resize: none;
+      outline: none; /*Светящаяся рамка:убераем*/
+      border-width: 2px; /*Ширина рамки:2px*/
+      border-radius: 2px; /*Скругление углов:2px*/
+      font-size: 18pt; /*Размер шрифта:18pt*/
+      background: #ecf0f1;
+    }
+    @media screen and (max-width: 767px) {
+      width: 480px;
+      border-width: 1px; /*Ширина рамки:2px*/
+      border-radius: 1px; /*Скругление углов:2px*/
+      font-size: 14pt;
+    }
+  }
+  .keydbord-wrapper {
+    margin: 0 auto;
+    margin-top: 20px;
+    width: 750px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    background: #fff;
+    border: 2px solid rgb(233, 233, 233);
+    border-radius: 5px;
+    transition: top 0.5s;
+    position: relative;
+    top: calc(100vh - 250px);
+    @media screen and (max-width: 767px) {
+      width: 480px;
+    }
+  }
 }
 
 .ru,
@@ -75,12 +82,55 @@ body {
   &:hover {
     border-radius: 50px;
   }
+  @media screen and (max-width: 767px) {
+    width: 28px;
+    height: 28px;
+    margin: 2px;
+  }
 }
-
+.Rec {
+  span button {
+    background-image: url("/src/assets/images/mic_black.png");
+    background-size: 25px;
+    background-repeat: no-repeat;
+    background-position: center;
+    &:hover {
+      // background-image: url("/src/assets/images/mic_white.png");
+      background-color: red;
+    }
+    @media screen and (max-width: 767px) {
+      background-size: 17px;
+    }
+  }
+}
 .record {
   span button {
+    background-image: url("/src/assets/images/mic_white.png");
     background-color: red;
-    color: aliceblue;
+  }
+}
+
+.Sound {
+  span button {
+    background-image: url("/src/assets/images/sound_black.png");
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: center;
+    &:hover {
+      background-image: url("/src/assets/images/sound_white.png");
+    }
+    @media screen and (max-width: 767px) {
+      background-size: 14px;
+    }
+  }
+}
+
+.SoundOn {
+  border-radius: 50px;
+  span button {
+    background-image: url("/src/assets/images/sound_white.png");
+    background-color: slateblue;
+    border-radius: 50px;
   }
 }
 
@@ -109,6 +159,9 @@ body {
     border-radius: 50px;
     color: aliceblue;
   }
+  @media screen and (max-width: 767px) {
+    font-size: 0.7em;
+  }
 }
 
 .clicked-button {
@@ -119,19 +172,16 @@ body {
     color: aliceblue;
   }
 }
-.Rec {
-  span button {
-    &:hover {
-      background-color: red;
-    }
-  }
-}
+
 .Lang {
   span button span {
     position: relative;
     font-size: x-small;
     top: -7px;
     right: -1px;
+    @media screen and (max-width: 767px) {
+      font-size: 0.65em;
+    }
   }
 }
 
@@ -141,10 +191,16 @@ body {
 .ShiftRight,
 .Enter {
   width: 90px;
+  @media screen and (max-width: 767px) {
+    width: 60px;
+  }
 }
 
 .Space {
   width: 190px;
+  @media screen and (max-width: 767px) {
+    width: 124px;
+  }
 }
 
 .info {

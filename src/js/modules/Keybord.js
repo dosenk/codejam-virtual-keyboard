@@ -7,10 +7,10 @@ export default class Keybord {
     this.capsLockFlag = capsLockFlag;
     this.pressedShift = false;
     this.upperkey = upperkey;
-     this.recoding = false;
+    this.recoding = false;
+    this.sound = false;
+    this.soundFlag = 'off';
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    this.recognition = new SpeechRecognition();
-    this.initRecorder();
   }
 
   static createButton(tagName, innerText = null, ...classes) {
@@ -43,7 +43,8 @@ export default class Keybord {
     Keybord.setAttribute(this.textArea, ['cols', '55'], ['rows', '10']);
     this.keydbord = Keybord.createButton('div', null, 'keydbord-wrapper');
     const infoDiv = Keybord.createButton('div', null, 'info');
-    const innerText = 'Клавиатура создана в операционной системе Windows \t\n Для переключения языка комбинация: левыe Shift + Alt';
+    const innerText = 'The keyboard was created in the Windows';
+    //  \t\n Для переключения языка комбинация: левыe Shift + Alt';
     const infoDivText = Keybord.createButton('p', innerText, 'infoText');
     infoDiv.append(infoDivText);
     textAreaDiv.append(this.textArea);
@@ -55,6 +56,10 @@ export default class Keybord {
       const index = this.keyCode.indexOf(key);
       let capslockClassRu = 'notCaps';
       let capslockClassEn = 'notCaps';
+      const buttonSpanUpEn = Keybord.createButton('button', this.keys.EN_CAPS[index], 'buttonUp');
+      const buttonSpanUpRu = Keybord.createButton('button', this.keys.RU_CAPS[index], 'buttonUp');
+      const buttonSpanDownEn = Keybord.createButton('button', this.keys.EN[index], 'button');
+      const buttonSpanDownRu = Keybord.createButton('button', this.keys.RU[index], 'button');
       if (index < 1) {
         capslockClassRu = 'Caps';
         capslockClassEn = 'notCaps';
@@ -87,10 +92,7 @@ export default class Keybord {
       }
       const buttonSpanRu = Keybord.createButton('span', null, 'lang', 'ru', capslockClassRu);
       const buttonSpanEn = Keybord.createButton('span', null, 'lang', 'en', capslockClassEn);
-      const buttonSpanUpEn = Keybord.createButton('button', this.keys.EN_CAPS[index], 'buttonUp');
-      const buttonSpanUpRu = Keybord.createButton('button', this.keys.RU_CAPS[index], 'buttonUp');
-      const buttonSpanDownEn = Keybord.createButton('button', this.keys.EN[index], 'button');
-      const buttonSpanDownRu = Keybord.createButton('button', this.keys.RU[index], 'button');
+
       buttonSpanEn.append(buttonSpanDownEn, buttonSpanUpEn);
       buttonSpanRu.append(buttonSpanDownRu, buttonSpanUpRu);
       if (this.language === 'ru') {
@@ -103,12 +105,6 @@ export default class Keybord {
         else buttonSpanDownEn.classList.add('active-button');
       }
       buttonDiv.append(buttonSpanRu, buttonSpanEn);
-      // if (key === 'CapsLock' && this.capsLockFlag) {
-      //   if (!buttonDiv.classList.contains('clicked-button-capslock')) {
-      //     buttonDiv.classList.add('clicked-button-capslock');
-      //     this.clickedButton.add('CapsLock');
-      //   }
-      // }
       this.keydbord.append(buttonDiv);
     });
     mainDiv.append(infoDiv, textAreaDiv, this.keydbord);
@@ -124,10 +120,8 @@ export default class Keybord {
     document.addEventListener('keydown', (event) => {
       const { code } = event;
       if (this.keyCode.indexOf(code) < 0) return;
-      if (event.code !== 'ArrowUp' && event.code !== 'ArrowDown') {
-        event.preventDefault();
-      }
-
+      // if (event.code !== 'ArrowUp' && event.code !== 'ArrowDown') {
+      event.preventDefault();
       this.keyDownHandler(event, code);
     });
     document.addEventListener('keyup', (event) => {
@@ -143,31 +137,46 @@ export default class Keybord {
         this.displayKeybord(false);
       }
     });
-    document.addEventListener('mouseup', this.mouseUp);
+    document.addEventListener('mouseup', this.mouseUp.bind(this));
   }
 
- mouseUp = (event) => {
+  playSound(key) {
+    this.audio = new Audio();
+    this.audio.preload = 'auto';
+    if (this.sound) {
+      const newkey = (key === 'ShiftLeft' || key === 'ShiftRight') ? 'shift' : key;
+      switch (newkey) {
+        case 'shift':
+        case 'CapsLock':
+        case 'Backspace':
+        case 'Enter':
+          this.audio.src = `./assets/sounds/${newkey}.mp3`;
+          break;
+        default:
+          this.audio.src = './assets/sounds/click.mp3';
+          break;
+      }
+      this.audio.play();
+    }
+  }
+
+  mouseUp(event) {
     if (event.target.classList.contains('active-button')) {
-      
       const code = event.target.parentNode.parentNode.getAttribute('code');
       if (code === 'ShiftRight' || code === 'ShiftLeft') {
-        // if (this.checkFromMemoryBtn('ShiftRight') || this.checkFromMemoryBtn('ShiftLeft')) return;
         this.pressedShift = !this.pressedShift;
         this.changeShiftForMouse();
+        this.playSound(code);
         return;
       }
       if (code === 'Lang') {
+        this.playSound(code);
         this.changeLang(code);
         return;
       }
 
       this.keyDownHandler(event, code);
-      if (this.pressedShift && code !== 'CapsLock') {
-        this.pressedShift = !this.pressedShift;
-        this.capsLockFlag = true;
-        // const btnShift = this.checkFromMemoryBtn('ShiftRight') ? 'ShiftRight' : 'ShiftLeft';
-        this.changeShiftForMouse();
-      }
+
       document.querySelectorAll('.clicked-button').forEach((elem) => {
         if (elem.getAttribute('code') === 'CapsLock' || elem.getAttribute('code') === 'ShiftLeft' || elem.getAttribute('code') === 'ShiftRight') return;
         elem.classList.remove('clicked-button');
@@ -209,26 +218,28 @@ export default class Keybord {
     return this.clickedButton.has(btn);
   }
 
-
-   initRecorder(){
+  initRecorder() {
     this.recognition.continuous = true;
-    this.recognition.lang = 'ru-RU';
+    this.recognition.lang = `${this.language}-${this.language.toUpperCase()}`;
     this.recognition.interimResults = true;
     this.recognition.maxAlternatives = 1;
   }
 
-  changedRecBtn(btnRec) {
-    btnRec.classList.add('record')
-    setTimeout((btnRec)=> {
-      btnRec.classList.remove('record')
-    }, 500)
-  }
-
   keyDownHandler(e, key) {
+    if (this.pressedShift && key !== 'CapsLock') {
+      this.pressedShift = !this.pressedShift;
+      this.capsLockFlag = true;
+      // const btnShift = this.checkFromMemoryBtn('ShiftRight') ? 'ShiftRight' : 'ShiftLeft';
+      this.changeShiftForMouse();
+    }
     let buttonActiveClass; // 'buttonUp' or 'button'
     /* *************************************** CAPSLOCK *********************************** */
     if (key === 'CapsLock') {
-      if (e.repeat) return;
+      if (e.repeat) {
+        return;
+      }
+      this.playSound(key);
+
       let classFlag;
       this.capsLockFlag = !this.capsLockFlag;
       buttonActiveClass = this.capsLockFlag ? 'buttonUp' : 'button';
@@ -237,7 +248,7 @@ export default class Keybord {
       } else {
         classFlag = buttonActiveClass !== 'button';
       }
-      
+
       if (this.checkFromMemoryBtn('CapsLock')) this.removeFromMemoryBtn('CapsLock');
       else this.sendToMemoryBtn('CapsLock');
       this.renderActiveButton(buttonActiveClass);
@@ -247,16 +258,19 @@ export default class Keybord {
     /* *************************************** SHIFT ************************************* */
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
       if (e.repeat) return;
-      document.querySelector('.ShiftLeft').childNodes.forEach(spans => {
-        spans.childNodes.forEach(button=> {
-          button.disabled = true
-        })
-      })
-      document.querySelector('.ShiftRight').childNodes.forEach(spans => {
-        spans.childNodes.forEach(button=> {
-          button.disabled = true
-        })
-      })
+      this.playSound(key);
+      document.querySelector('.ShiftLeft').childNodes.forEach((spans) => {
+        spans.childNodes.forEach((button) => {
+          const btn = button;
+          btn.disabled = true;
+        });
+      });
+      document.querySelector('.ShiftRight').childNodes.forEach((spans) => {
+        spans.childNodes.forEach((button) => {
+          const btn = button;
+          btn.disabled = true;
+        });
+      });
       if (this.checkFromMemoryBtn('ShiftLeft') || this.checkFromMemoryBtn('ShiftRight')) return;
       if (this.pressedShift) this.pressedShift = !this.pressedShift;
       buttonActiveClass = this.capsLockFlag ? 'button' : 'buttonUp';
@@ -268,41 +282,49 @@ export default class Keybord {
       Keybord.changeClassClickedButton(key2, true);
       return;
     }
+
+    this.playSound(key); // sound keydbord
+    let keyValue = Keybord.getLetter(key);
+    let { selectionStart } = this.textArea;
+    let { selectionEnd } = this.textArea;
+    let shift = 1;
+
     if (key === 'Rec') {
-      let btnRec = document.querySelector(`.${key}`);
-      if(!this.recoding){
+      let flag = true;
+      const recClass = 'record';
+      if (!this.recoding) {
+        // eslint-disable-next-line no-undef
+        this.recognition = new SpeechRecognition();
+        this.initRecorder();
         this.recoding = true;
         this.recognition.start();
-        this.recognition.addEventListener('result', e => {
-        const transcript = Array.from(e.results)
-        .map(result => result[0])
-        .map(result => result.transcript)
-        .join('');
-          if (e.results[0].isFinal) {
-              this.textArea.value = transcript;
+        this.recognition.addEventListener('result', (event) => {
+          if (event.results[event.results.length - 1].isFinal) {
+            this.printLetter(this.textArea.selectionStart, this.textArea.selectionEnd,
+              shift = event.results[event.results.length - 1][0].transcript.length,
+              keyValue = event.results[event.results.length - 1][0].transcript);
           }
         });
-        btnRec.classList.add('record')
-        this.refreshRecBtn = setInterval(()=>{
-            btnRec.classList.toggle('record')
-        }, 500, btnRec)
-      
-      }else{
+        Keybord.changeClassClickedButton(key, flag);
+        this.refreshRecBtn = setInterval(() => {
+          flag = !flag;
+          Keybord.changeClassClickedButton(key, flag, recClass);
+        }, 500, key, flag, recClass);
+      } else {
         this.recoding = false;
         this.recognition.stop();
-        clearInterval(this.refreshRecBtn)
-        btnRec.classList.remove('record')
+        this.recognition = null;
+        clearInterval(this.refreshRecBtn);
+        Keybord.changeClassClickedButton(key, false, recClass);
       }
       return;
     }
 
-    if (key = 'Sound') {
-      let audio = new Audio();
-      audio.preload = 'auto';
-      audio.src = './assets/sounds/click.mp3';
-      audio.play();
-      console.log('soundOn');
-      return
+    if (key === 'Sound') {
+      this.sound = !this.sound;
+      this.soundFlag = this.sound ? 'on' : 'off';
+      Keybord.changeClassClickedButton(key, this.sound, `${key}On`);
+      return;
     }
 
     this.sendToMemoryBtn(key);
@@ -314,10 +336,110 @@ export default class Keybord {
       return;
     }
     /* *********************************** UP DOWN *********************************** */
-    if (key === 'ArrowUp' || key === 'ArrowDown') return;
+    if (key === 'ArrowUp' || key === 'ArrowDown') {
+      const reg = /\n/i;
+      if (key === 'ArrowUp') {
+        if (this.textArea.value.match(reg) !== null) {
+          const array = this.textArea.value.split('\n');
+          const position = this.textArea.selectionStart;
+          let countRight = 0;
+          let countLeft = 0;
+          let str = [];
+          for (let i = position; i < this.textArea.value.length; i += 1) {
+            if (this.textArea.value[i] === '\n') {
+              break;
+            }
+            countRight += 1;
+            str.push(this.textArea.value[i]);
+          }
+          for (let i = position - 1; i >= 0; i -= 1) {
+            if (this.textArea.value[i] === '\n') {
+              break;
+            }
+            countLeft += 1;
+            str.unshift(this.textArea.value[i]);
+          }
+          str = str.join('');
+          for (let i = 0; i < array.length; i += 1) {
+            if (array[i] === str) {
+              if (i !== 0) {
+                if (array[i].length > array[i - 1].length) {
+                  if (countLeft > array[i - 1].length) {
+                    this.textArea.selectionStart = (position - countLeft - 1);
+                    this.textArea.selectionEnd = (position - countLeft - 1);
+                  } else {
+                    this.textArea.selectionStart = ((position - countLeft - 1)
+                    - array[i - 1].length) + countLeft;
+                    this.textArea.selectionEnd = ((position - countLeft - 1)
+                    - array[i - 1].length) + countLeft;
+                  }
+                } else {
+                  this.textArea.selectionStart = (position - countLeft - 1)
+                  - (array[i - 1].length - array[i].length) - countRight;
+                  this.textArea.selectionEnd = (position - countLeft - 1)
+                  - (array[i - 1].length - array[i].length) - countRight;
+                }
+              } else {
+                this.textArea.selectionStart = 0;
+                this.textArea.selectionEnd = 0;
+              }
+            }
+          }
+        } else {
+          this.textArea.selectionStart = 0;
+          this.textArea.selectionEnd = 0;
+        }
+      } else if (this.textArea.value.match(reg) !== null) {
+        const array = this.textArea.value.split('\n');
+        const position = this.textArea.selectionStart;
+        let countRight = 0;
+        let countLeft = 0;
+        let str = [];
+        for (let i = position; i < this.textArea.value.length; i += 1) {
+          if (this.textArea.value[i] === '\n') {
+            break;
+          }
+          countRight += 1;
+          str.push(this.textArea.value[i]);
+        }
+        for (let i = position - 1; i >= 0; i -= 1) {
+          if (this.textArea.value[i] === '\n') {
+            break;
+          }
+          countLeft += 1;
+          str.unshift(this.textArea.value[i]);
+        }
+        str = str.join('');
+        for (let i = 1; i <= array.length - 1; i += 1) {
+          if (array[i - 1] === str) {
+            if (i !== array.length) {
+              if (array[i - 1].length > array[i].length) {
+                if (countLeft > array[i].length) {
+                  this.textArea.selectionStart = position + countRight + 1
+                  + (array[i - 1].length - (array[i - 1].length - array[i].length));
+                  this.textArea.selectionEnd = position + countRight + 1
+                  + (array[i - 1].length - (array[i - 1].length - array[i].length));
+                } else {
+                  this.textArea.selectionStart = position + countRight + 1 + countLeft;
+                  this.textArea.selectionEnd = position + countRight + 1 + countLeft;
+                }
+              } else {
+                this.textArea.selectionStart = position + countRight + 1 + countLeft;
+                this.textArea.selectionEnd = position + countRight + 1 + countLeft;
+              }
+            } else {
+              this.textArea.selectionStart = this.textArea.value.length;
+              this.textArea.selectionEnd = this.textArea.value.length;
+            }
+          }
+        }
+      } else {
+        this.textArea.selectionStart = this.textArea.value.length;
+        this.textArea.selectionEnd = this.textArea.value.length;
+      }
+      return;
+    }
 
-    let { selectionStart } = this.textArea;
-    let { selectionEnd } = this.textArea;
     /* *********************************** Backspace Delete********************************* */
     if (key === 'Backspace' || key === 'Delete') {
       if (key === 'Backspace') {
@@ -332,8 +454,6 @@ export default class Keybord {
       return;
     }
 
-    let keyValue = Keybord.getLetter(key);
-    let shift = 1;
     if (key === 'Tab') keyValue = '\t';
     if (key === 'Enter') keyValue = '\n';
     if (key === 'Space') keyValue = ' ';
@@ -354,24 +474,32 @@ export default class Keybord {
       + this.textArea.value.slice(selectionEnd);
       this.textArea.selectionStart = selectionStart + shift;
       this.textArea.selectionEnd = selectionStart + shift;
+      if (this.textArea.scrollHeight > this.textArea.clientHeight) {
+        this.textArea.scrollTop = this.textArea.scrollHeight;
+      }
     }
   }
 
   keyUpHandler(e, key) {
     let buttonActiveClass;
-    if (key === 'CapsLock') return;
-
+    if (key === 'CapsLock') {
+      this.sound = this.soundFlag === 'on';
+      return;
+    }
     if (key === 'ShiftLeft' || key === 'ShiftRight') {
-      document.querySelector('.ShiftLeft').childNodes.forEach(spans => {
-        spans.childNodes.forEach(button=> {
-          button.disabled = false
-        })
-      })
-      document.querySelector('.ShiftRight').childNodes.forEach(spans => {
-        spans.childNodes.forEach(button=> {
-          button.disabled = false
-        })
-      })
+      this.sound = this.soundFlag === 'on';
+      document.querySelector('.ShiftLeft').childNodes.forEach((spans) => {
+        spans.childNodes.forEach((button) => {
+          const btn = button;
+          btn.disabled = false;
+        });
+      });
+      document.querySelector('.ShiftRight').childNodes.forEach((spans) => {
+        spans.childNodes.forEach((button) => {
+          const btn = button;
+          btn.disabled = false;
+        });
+      });
       buttonActiveClass = this.capsLockFlag ? 'button' : 'buttonUp';
       const key2 = key === 'ShiftLeft' ? 'ShiftRight' : 'ShiftLeft';
       this.removeFromMemoryBtn(key);
@@ -386,23 +514,10 @@ export default class Keybord {
     Keybord.changeClassClickedButton(key, false);
   }
 
-  static changeClassClickedButton(key, flag = true) {
+  static changeClassClickedButton(key, flag = true, addedClass = 'clicked-button') {
     const nowClickedButtonDiv = document.querySelector(`.${key}`);
-    // const nowClickedButton = document.querySelector(`.${key}`);
-    // console.log(nowClickedButton);
-    let addedClass = 'clicked-button'
-    // if (key === 'CapsLock') {
-    //   addedClass = 'clicked-button-capslock'
-    // }
-    if (flag) 
-    {
-      nowClickedButtonDiv.classList.add(addedClass);
-      // nowClickedButton.classList.add(addedClass);
-
-    } else {
-      nowClickedButtonDiv.classList.remove(addedClass);
-      // nowClickedButton.classList.remove(addedClass);
-    }
+    if (flag) nowClickedButtonDiv.classList.add(addedClass);
+    else nowClickedButtonDiv.classList.remove(addedClass);
   }
 
   static getLetter(key) {
