@@ -13,7 +13,7 @@ module.exports = {
   },
   output: {
     filename: '[name].[contenthash].js',
-    path: isDev ? path.resolve(__dirname, 'dist') : path.resolve(__dirname, 'virtual-keybord'),
+    path: isDev ? path.resolve(__dirname, 'dist') : path.resolve(__dirname, 'virtual-keyboard'),
   },
   devServer: {
     port: 4200,
