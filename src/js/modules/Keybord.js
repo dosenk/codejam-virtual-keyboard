@@ -44,7 +44,6 @@ export default class Keybord {
     this.keydbord = Keybord.createButton('div', null, 'keydbord-wrapper');
     const infoDiv = Keybord.createButton('div', null, 'info');
     const innerText = 'The keyboard was created in the Windows';
-    //  \t\n Для переключения языка комбинация: левыe Shift + Alt';
     const infoDivText = Keybord.createButton('p', innerText, 'infoText');
     infoDiv.append(infoDivText);
     textAreaDiv.append(this.textArea);
@@ -226,12 +225,6 @@ export default class Keybord {
   }
 
   keyDownHandler(e, key) {
-    if (this.pressedShift && key !== 'CapsLock') {
-      this.pressedShift = !this.pressedShift;
-      this.capsLockFlag = true;
-      // const btnShift = this.checkFromMemoryBtn('ShiftRight') ? 'ShiftRight' : 'ShiftLeft';
-      this.changeShiftForMouse();
-    }
     let buttonActiveClass; // 'buttonUp' or 'button'
     /* *************************************** CAPSLOCK *********************************** */
     if (key === 'CapsLock') {
@@ -466,6 +459,12 @@ export default class Keybord {
     }
 
     this.printLetter(selectionStart, selectionEnd, shift, keyValue);
+    if (this.pressedShift && key !== 'CapsLock') {
+      this.pressedShift = !this.pressedShift;
+      this.capsLockFlag = true;
+      // const btnShift = this.checkFromMemoryBtn('ShiftRight') ? 'ShiftRight' : 'ShiftLeft';
+      this.changeShiftForMouse();
+    }
   }
 
   printLetter(selectionStart, selectionEnd, shift = 0, keyValue = '') {
